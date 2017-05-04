@@ -42,11 +42,27 @@ func Read(r io.Reader, byteschedule ...int64) (ms []Measure, err error) {
 	return Copy(w, r, byteschedule...)
 }
 
+type zeroReader struct{}
+
+func (zr *zeroReader) Read(b []byte) (int, error) {
+	b = b[:cap(b)]
+	return len(b), nil
+}
+
 // Write benchmarks io.Writer.
-// Write writes random data to w by chunks which sizes are specified in byteschedule.
+// Write writes zero data to w by chunks which sizes are specified in byteschedule.
 // Write returns all collected measures (even failed ones).
 func Write(w io.Writer, byteschedule ...int64) (ms []Measure, err error) {
-	// XXX: This may be slow. We need a random stream merely to prevent compression.
+	r := &zeroReader{}
+	return Copy(w, r, byteschedule...)
+}
+
+// WriteRand benchmarks io.Writer and prevents data compression.
+// WriteRand writes random data to w by chunks which sizes are specified in byteschedule.
+// WriteRand returns all collected measures (even failed ones).
+//
+// Note that WriteRand may be substantially slower than Write.
+func WriteRand(w io.Writer, byteschedule ...int64) (ms []Measure, err error) {
 	r := rand.New(rand.NewSource(1).(rand.Source64))
 	return Copy(w, r, byteschedule...)
 }
