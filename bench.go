@@ -10,8 +10,10 @@ package bench
 import (
 	"io"
 	"io/ioutil"
-	"math/rand"
+	mrand "math/rand"
 	"time"
+
+	"github.com/nogoegst/rand"
 )
 
 // Copy is a generic benchmarking function that copies data from r to w
@@ -63,6 +65,6 @@ func Write(w io.Writer, byteschedule ...int64) (ms []Measure, err error) {
 //
 // Note that WriteRand may be substantially slower than Write.
 func WriteRand(w io.Writer, byteschedule ...int64) (ms []Measure, err error) {
-	r := rand.New(rand.NewSource(1).(rand.Source64))
+	r := mrand.New(mrand.NewSource(rand.Int63()).(mrand.Source64))
 	return Copy(w, r, byteschedule...)
 }
